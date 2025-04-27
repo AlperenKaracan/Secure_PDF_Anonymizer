@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Hakem Listesi - Güvenli Belge Anonimleştirici{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Hakem Listesi</h2>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-striped table-bordered" id="reviewerTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>İsim</th>
+                        <th>İlgi Alanları</th>
+                        <th>Eylem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reviewer in reviewers %}
+                    <tr>
+                        <td>{{ reviewer.name }}</td>
+                        <td>{{ reviewer.interests | join(', ') }}</td>
+                        <td>
+                            <a href="{{ url_for('main.hakem', reviewer=reviewer.name) }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-eye"></i> Atanan Makaleleri Gör
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function(){
+    if ($.fn.DataTable.isDataTable('#reviewerTable')) {
+        $('#reviewerTable').DataTable().destroy();
+    }
+    $('#reviewerTable').DataTable({
+        responsive: true,
+        language: {
+            search: "Hakem Ara:",
+            lengthMenu: "_MENU_ giriş göster",
+            info: "_START_ - _END_ / _TOTAL_ giriş gösteriliyor",
+            paginate: { previous: "Önceki", next: "Sonraki" }
+        }
+    });
+});
+</script>
+{% endblock %}

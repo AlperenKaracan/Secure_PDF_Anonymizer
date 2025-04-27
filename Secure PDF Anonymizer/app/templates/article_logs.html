@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow">
+    <div class="card-body">
+      <h3 class="card-title mb-4">
+        Makale Log Kayıtları
+        <small class="text-muted">({{ article.tracking_number }})</small>
+      </h3>
+      {% if logs and logs|length > 0 %}
+        <ul class="list-group list-group-flush">
+          {% for log in logs|sort(attribute='zaman', reverse=True) %}
+            <li class="list-group-item py-3">
+              <div class="mb-1 text-secondary fw-bold">
+                Zaman:
+                {% set display_time = log.zaman[:19] | replace("T"," ") %}
+                {{ display_time }}
+              </div>
+              <div>
+                <span class="fw-semibold">Mesaj:</span>
+                {{ log.mesaj }}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted">Herhangi bir log kaydı yok.</p>
+      {% endif %}
+      <a href="{{ url_for('main.editor_dashboard') }}" class="btn btn-primary mt-3">
+        Geri Dön
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Hakem Paneli - Güvenli Belge Anonimleştirici{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Hakem Paneli</h2>
+    <form method="GET" action="{{ url_for('main.hakem') }}" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <select name="reviewer" class="form-select">
+                <option value="">-- Hakem Seç --</option>
+                {% for reviewer in reviewers %}
+                <option value="{{ reviewer.name }}">{{ reviewer.name }} ({{ reviewer.interests | join(', ') }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filtrele</button>
+        </div>
+    </form>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-striped table-bordered" id="reviewerTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Takip Numarası</th>
+                        <th>Durum</th>
+                        <th>Anahtar Kelimeler</th>
+                        <th>Atanan Hakem</th>
+                        <th>Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for article in articles %}
+                    <tr>
+                        <td>{{ article.tracking_number }}</td>
+                        <td>
+                            {% if article.status == "anonymized" %}
+                                <span class="badge bg-success">Anonimleştirilmiş</span>
+                            {% elif article.status == "reviewed" %}
+                                <span class="badge bg-info">İncelenmiş</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ article.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ article.keywords }}</td>
+                        <td>
+                            {% if article.assigned_reviewers %}
+                                {{ article.assigned_reviewers | join(", ") }}
+                            {% else %}
+                                <span class="text-muted">Atanmamış</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if article.status == "anonymized" %}
+                                <a href="{{ url_for('main.review_article', tracking_number=article.tracking_number) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-pencil-square"></i> İncele
+                                </a>
+                            {% elif article.status == "reviewed" %}
+                                <span class="badge bg-success">İncelenmiş</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                            {% if article.anonymized_filepath %}
+                                <a href="{{ url_for('main.download', tracking_number=article.tracking_number) }}" class="btn btn-info btn-sm">
+                                    <i class="bi bi-download"></i> İndir
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function(){
+    if ($.fn.DataTable.isDataTable('#reviewerTable')) {
+        $('#reviewerTable').DataTable().destroy();
+    }
+    $('#reviewerTable').DataTable({
+        responsive: true,
+        dom: 'Bfrtip',
+        buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+        language: {
+            search: "Kayıtları Filtrele:",
+            lengthMenu: "_MENU_ giriş göster",
+            info: "_START_ - _END_ / _TOTAL_ giriş gösteriliyor",
+            paginate: { previous: "Önceki", next: "Sonraki" }
+        }
+    });
+});
+</script>
+{% endblock %}

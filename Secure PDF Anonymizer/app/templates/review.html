@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Makale İnceleme - Güvenli Belge Anonimleştirici{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <div class="card mx-auto shadow-sm" style="max-width: 600px;">
+        <div class="card-body">
+            <h3 class="card-title text-center">Makale İnceleme</h3>
+            <p class="text-center">Takip Numarası: <strong>{{ article.tracking_number }}</strong></p>
+            {% if success %}
+                <div class="alert alert-success">İncelemeniz başarıyla gönderildi!</div>
+            {% else %}
+                <form method="POST" id="reviewForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="score" class="form-label">Sayısal Puan (1-10)</label>
+                        <input type="number" class="form-control" id="score" name="score" min="1" max="10" required>
+                        <div class="invalid-feedback">Lütfen 1-10 arasında bir puan girin.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Yıldız Derecesi (1-5)</label>
+                        <div id="starRating" class="text-center mb-2">
+                            {% for i in range(1,6) %}
+                            <input type="radio" name="star_rating" id="star{{i}}" value="{{i}}" class="d-none" required>
+                            <label for="star{{i}}" class="star"><i class="bi bi-star"></i></label>
+                            {% endfor %}
+                        </div>
+                        <div class="invalid-feedback">Lütfen bir yıldız derecesi seçin.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="detailed_comments" class="form-label">Detaylı Yorumlar <span id="charCount" class="text-muted">(0/500)</span></label>
+                        <textarea class="form-control" id="detailed_comments" name="detailed_comments" rows="4" required maxlength="500"></textarea>
+                        <div class="invalid-feedback">Lütfen yorum girin.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-send"></i> İncelemeyi Gönder</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function(){
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+
+    $('#starRating label').on('mouseover', function(){
+        var index = $(this).index();
+        $('#starRating i').each(function(i){
+            if(i < index){
+                $(this).removeClass('bi-star').addClass('bi-star-fill text-warning');
+            } else {
+                $(this).removeClass('bi-star-fill text-warning').addClass('bi-star');
+            }
+        });
+    }).on('click', function(){
+        var index = $(this).index();
+        $('#starRating input').eq(index).prop('checked', true);
+    });
+
+    $('#detailed_comments').on('input', function(){
+        var length = $(this).val().length;
+        $('#charCount').text('(' + length + '/500)');
+    });
+});
+</script>
+{% endblock %}

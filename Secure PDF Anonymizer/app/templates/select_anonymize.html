@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Anonimleştirilecek Varlıkları Seç - Güvenli Belge Anonimleştirici{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Anonimleştirilecek Varlıkları Seç</h2>
+    <p class="text-center">Takip Numarası: <strong>{{ article.tracking_number }}</strong></p>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="POST" id="selectAnonymizeForm">
+                <p class="text-muted">Aşağıda tespit edilen hassas varlıklar listelenmiştir. Anonimleştirmek istediklerinizi seçin.</p>
+                <table class="table table-striped table-bordered" id="entitiesTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Dahil Et?</th>
+                            <th>Varlık</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entity in entities %}
+                        <tr>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="entities" value="{{ entity }}" id="entity_{{ loop.index }}">
+                                </div>
+                            </td>
+                            <td>{{ entity }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-primary w-100 mt-3" data-bs-toggle="modal" data-bs-target="#confirmAnonymizeModal">
+                    <i class="bi bi-shield-lock-fill"></i> Seçilenleri Anonimleştir
+                </button>
+            </form>
+
+            <div class="modal fade" id="confirmAnonymizeModal" tabindex="-1" aria-labelledby="confirmAnonymizeModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmAnonymizeModalLabel">Anonimleştirmeyi Onayla</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Seçtiğiniz varlıkları anonimleştirmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                            <button type="button" class="btn btn-primary" id="confirmAnonymizeBtn">Onayla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function(){
+    if (!$.fn.DataTable.isDataTable('#entitiesTable')) {
+        $('#entitiesTable').DataTable({
+            responsive: true,
+            searching: true,
+            paging: true,
+            language: {
+                search: "Varlık Ara:",
+                lengthMenu: "_MENU_ varlık göster",
+                info: "_START_ - _END_ / _TOTAL_ varlık gösteriliyor",
+                paginate: { previous: "Önceki", next: "Sonraki" }
+            }
+        });
+    }
+
+    $('#confirmAnonymizeBtn').on('click', function(){
+        $('#selectAnonymizeForm').submit();
+    });
+});
+</script>
+{% endblock %}

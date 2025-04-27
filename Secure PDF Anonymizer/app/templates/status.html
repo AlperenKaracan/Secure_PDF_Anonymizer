@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Durum Kontrolü - Güvenli Belge Anonimleştirici{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4 text-center">📄 Belge Durumunu Kontrol Et</h2>
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="POST" id="statusForm" class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label for="tracking_number" class="form-label">Takip Numarası</label>
+          <input type="text" class="form-control" id="tracking_number" name="tracking_number" placeholder="Örn: 1907" required>
+          <div class="invalid-feedback">Lütfen takip numarasını girin.</div>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">E-posta Adresiniz</label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="alperenözgür@gmail.com" required>
+          <div class="invalid-feedback">Lütfen geçerli bir e-posta girin.</div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-search"></i> Durumu Kontrol Et
+        </button>
+      </form>
+    </div>
+  </div>
+  {% if article %}
+  <hr>
+  <h4 class="mt-4">🔍 Belge Detayları</h4>
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <strong>Takip Numarası:</strong> {{ article.tracking_number }}
+    </div>
+    <div class="card-body">
+      <p>
+        <strong>Durum:</strong>
+        {% if article.status == "uploaded" %}
+          <span class="badge bg-primary">📤 Yüklenmiş</span>
+        {% elif article.status == "anonymized" %}
+          <span class="badge bg-success">🕵️‍♀️ Anonimleştirilmiş</span>
+        {% elif article.status == "reviewed" %}
+          <span class="badge bg-info">🔎 İncelenmiş</span>
+        {% elif article.status == "revision_requested" %}
+          <span class="badge bg-warning text-dark">🔄 Revizyon İstendi</span>
+        {% elif article.status == "revision_required" %}
+          <span class="badge bg-danger">⚠️ Revizyon Gerekiyor</span>
+        {% elif article.status == "revised" %}
+          <span class="badge bg-secondary">✅ Revize Edilmiş</span>
+        {% else %}
+          <span class="badge bg-secondary">{{ article.status }}</span>
+        {% endif %}
+      </p>
+
+      {% if article.revision_instructions %}
+      <p>
+        <strong>Revizyon Talimatları:</strong> {{ article.revision_instructions }}
+      </p>
+      {% endif %}
+
+      {% if article.anonymized_filepath %}
+      <p>
+        <a href="{{ url_for('main.download', tracking_number=article.tracking_number) }}" class="btn btn-info">
+          <i class="bi bi-download"></i> Anonimleştirilmiş PDF İndir
+        </a>
+      </p>
+      {% endif %}
+
+      {% if article.status == "revision_required" or article.status == "revision_requested" %}
+      <hr>
+      <p class="text-danger fw-bold">
+        🚨 Makaleniz için revizyon isteniyor. Lütfen talimatlara göre revize edilmiş PDF’i yükleyin.
+      </p>
+      <p>
+        <a href="{{ url_for('main.revision', tracking_number=article.tracking_number) }}" class="btn btn-warning">
+          <i class="bi bi-upload"></i> Revize Edilmiş PDF Yükle
+        </a>
+      </p>
+      {% endif %}
+    </div>
+  </div>
+  {% elif not_found %}
+  <div class="alert alert-warning mt-3">
+    ⚠️ Belge bulunamadı. Lütfen takip numarasını ve e-postanızı kontrol edin.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  (function () {
+    'use strict';
+    var forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms).forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  })();
+</script>
+{% endblock %}

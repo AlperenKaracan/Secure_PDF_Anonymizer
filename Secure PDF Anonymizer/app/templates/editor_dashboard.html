@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Editör Paneli - Makale Yönetimi{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="mb-4">Editör Paneli</h2>
+
+  <table id="editorTable" class="table table-striped table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>Takip No</th>
+        <th>Yazar E-Posta</th>
+        <th>Durum</th>
+        <th>Hakem Değerlendirmesi</th>
+        <th>Revizyon Geçmişi</th>
+        <th>İşlemler</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for article in articles %}
+      <tr>
+        <td>{{ article.tracking_number }}</td>
+
+        <td>{{ article.email }}</td>
+
+        <td>
+          {% if article.status == "uploaded" %}
+            <span class="badge bg-secondary">📥 Yüklendi</span>
+          {% elif article.status == "anonymized" %}
+            <span class="badge bg-warning text-dark">🕵️‍♂️ Anonimleştirildi</span>
+          {% elif article.status == "reviewed" %}
+            <span class="badge bg-info">🔍 Değerlendirildi</span>
+          {% elif article.status == "revision_required" %}
+            <span class="badge bg-danger">❗ Revizyon Gerekiyor</span>
+          {% elif article.status == "revision_requested" %}
+            <span class="badge bg-warning text-dark">🔄 Revizyon İstendi</span>
+          {% elif article.status == "revised" %}
+            <span class="badge bg-primary">✅ Revize Edilmiş</span>
+          {% else %}
+            <span class="badge bg-light text-dark">{{ article.status }}</span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% set review = reviews.get(article.tracking_number) %}
+          {% if review %}
+            <strong>⭐ Puan:</strong> {{ review.score }}<br>
+            <strong>🌟 Yıldız:</strong> {{ review.star_rating }}<br>
+            <strong>📝 Yorum:</strong> {{ review.detailed_comments }}
+          {% else %}
+            <span class="text-muted">Henüz değerlendirme yok</span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if article.revision_history %}
+            <ul class="list-unstyled mb-0">
+              {% for rev in article.revision_history %}
+                <li>
+                  {{ rev.timestamp }}
+                  {% if rev.revision_filepath %}
+                    (<a href="{{ url_for('main.download_revised_pdf', rev_path=rev.revision_filepath) }}">
+                      📎 Dosya
+                    </a>)
+                  {% else %}
+                    (Dosya Yüklenmedi)
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <span class="text-muted">Yok</span>
+          {% endif %}
+        </td>
+
+        <td>
+          {# 1) Revize Edilmiş PDF varsa, onu; yoksa Orijinal PDF indir #}
+          {% set last_revision = article.revision_history|last %}
+          {% if last_revision and last_revision.revision_filepath %}
+            <a href="{{ url_for('main.download_revised_pdf', rev_path=last_revision.revision_filepath) }}"
+               class="btn btn-sm btn-primary mb-1">
+              📄 Revize Edilmiş PDF İndir
+            </a>
+          {% else %}
+            <a href="{{ url_for('main.download_original', tracking_number=article.tracking_number) }}"
+               class="btn btn-sm btn-info mb-1">
+              📄 Orijinal PDF İndir
+            </a>
+          {% endif %}
+
+          {# 2) Hakem atama butonu #}
+          {% if article.status in ["uploaded", "anonymized", "revised", "revision_required"] %}
+            <a href="{{ url_for('main.manual_assign', tracking_number=article.tracking_number) }}"
+               class="btn btn-sm btn-warning mb-1">
+              👤 Hakemi Ata
+            </a>
+          {% endif %}
+
+          {# 3) Anonimleştirilmiş PDF indir butonu (varsa) #}
+          {% if article.anonymized_filepath %}
+            <a href="{{ url_for('main.download', tracking_number=article.tracking_number) }}"
+               class="btn btn-sm btn-secondary mb-1">
+              🔒 Anonimleştirilmiş PDF İndir
+            </a>
+          {% endif %}
+
+          {# 4) Revize iste butonu (reviewed veya revised ise) #}
+          {% if article.status in ["reviewed", "revised"] %}
+            <a href="{{ url_for('main.request_revision', tracking_number=article.tracking_number) }}"
+               class="btn btn-sm btn-danger mb-1">
+              ✏️ Revize İste
+            </a>
+          {% endif %}
+
+          {# 5) Makale Özel Loglarını Göster (opsiyonel) #}
+          <a href="{{ url_for('main.article_logs', tracking_number=article.tracking_number) }}"
+             class="btn btn-sm btn-dark mb-1">
+            📝 Makale Logları
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  $(document).ready(function() {
+    if ($.fn.DataTable.isDataTable('#editorTable')) {
+      $('#editorTable').DataTable().destroy();
+    }
+    $('#editorTable').DataTable({
+      responsive: true,
+      dom: 'Bfrtip',
+      buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+      language: {
+        search: "Ara:",
+        lengthMenu: "Her sayfada _MENU_ kayıt göster",
+        info: "Toplam _TOTAL_ kayıttan _START_ - _END_ arası",
+        paginate: {
+          previous: "Önceki",
+          next: "Sonraki"
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

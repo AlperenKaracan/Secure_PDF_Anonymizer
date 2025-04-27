@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Manuel Hakem Atama{% endblock %}
+{% block content %}
+
+<div class="container my-4">
+  <h2 class="mb-3">Manuel Hakem Atama</h2>
+  <p>Takip Numarası: <strong>{{ article.tracking_number }}</strong></p>
+
+  <div class="accordion" id="domainAccordion">
+    {% for domain, subfields in matched_domains.items() %}
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="heading{{ loop.index }}">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
+          {{ domain }}
+        </button>
+      </h2>
+      <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}"
+           data-bs-parent="#domainAccordion">
+        <div class="accordion-body">
+          <ul class="mb-0">
+            {% for sf in subfields %}
+            <li>{{ sf }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <hr class="my-4">
+
+  <form method="POST">
+    <div class="mb-4">
+      <label for="sections" class="form-label">
+        Anonimleştirmeden Hariç Tutulacak Bölümler
+        <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
+           title="Bu bölümler redaksiyona dahil edilmeyecek, dolayısıyla anonimleştirme yapılmayacaktır."></i>
+      </label>
+      <div class="d-flex flex-wrap">
+        {% for sec in sections %}
+        <div class="form-check form-check-inline me-3 mb-2">
+          <input class="form-check-input" type="checkbox" name="sections" id="sec{{ loop.index }}" value="{{ sec }}">
+          <label class="form-check-label" for="sec{{ loop.index }}">{{ sec }}</label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Potansiyel Hakemler</label>
+      {% if potential_reviewers %}
+        <div class="list-group">
+          {% for reviewer in potential_reviewers %}
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <input class="form-check-input me-2" type="radio" name="reviewer"
+                         value="{{ reviewer['name'] }}" id="reviewer{{ loop.index }}" required>
+                  <label class="form-check-label fw-semibold" for="reviewer{{ loop.index }}">
+                    {{ reviewer['name'] }}
+                  </label>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#revDetail{{ loop.index }}"
+                        aria-expanded="false" aria-controls="revDetail{{ loop.index }}">
+                  Detay
+                </button>
+              </div>
+              <div class="collapse mt-2" id="revDetail{{ loop.index }}">
+                <div class="card card-body p-2">
+                  <p class="mb-1"><strong>İlgi Alanları:</strong></p>
+                  <ul class="mb-2">
+                    {% for interest in reviewer['interests'] %}
+                    <li>{{ interest }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">Herhangi bir hakem bulunamadı.</p>
+      {% endif %}
+    </div>
+
+    <div class="d-grid mt-4">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check2-circle me-1"></i>
+        Hakemi Ata ve Anonimleştir
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+  })
+})
+</script>
+
+{% endblock %}

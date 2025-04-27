@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Revizyon İsteği{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <h2 class="mb-4">Revizyon İsteği</h2>
+  <p>Takip Numarası: <strong>{{ article.tracking_number }}</strong></p>
+  <form method="POST">
+    <div class="mb-3">
+      <label for="instructions" class="form-label">Revizyon İçin Açıklamalar</label>
+      <textarea class="form-control" id="instructions" name="instructions" rows="4" placeholder="Eksik veya düzeltilmesi gereken yerleri belirtin..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-danger">Revizyon İsteği Gönder</button>
+  </form>
+</div>
+{% endblock %}

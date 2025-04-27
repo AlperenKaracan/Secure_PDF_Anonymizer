@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Standart Anonimleştirme - Güvenli Belge Anonimleştirici{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Standart Anonimleştirme</h2>
+    <p class="text-center">Takip Numarası: <strong>{{ article.tracking_number }}</strong></p>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="text-muted">Bu işlem, tespit edilen tüm hassas varlıkları otomatik olarak anonimleştirecektir. Devam etmek istiyor musunuz?</p>
+            <form method="POST" id="standardAnonymizeForm">
+                <button type="button" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#confirmAnonymizeModal">
+                    <i class="bi bi-shield-lock-fill"></i> Belgeyi Anonimleştir
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmAnonymizeModal" tabindex="-1" aria-labelledby="confirmAnonymizeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmAnonymizeModalLabel">Anonimleştirmeyi Onayla</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Tespit edilen tüm hassas varlıkları anonimleştirmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-warning" id="confirmAnonymizeBtn">Anonimleştir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$('#confirmAnonymizeBtn').on('click', function(){
+    $('#standardAnonymizeForm').submit();
+});
+</script>
+{% endblock %}

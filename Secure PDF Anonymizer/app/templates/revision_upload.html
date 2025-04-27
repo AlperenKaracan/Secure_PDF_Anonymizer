@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Revize Belge Yükle - Güvenli Belge Anonimleştirici{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Revize Belge Yükle</h2>
+    <p class="text-center">Takip Numarası: <strong>{{ article.tracking_number }}</strong></p>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data" id="revisionForm" class="needs-validation" novalidate>
+                <div class="mb-3">
+                    <label for="file" class="form-label">Revize PDF Dosyasını Seçin</label>
+                    <input type="file" class="form-control" id="file" name="file" accept="application/pdf" required>
+                    <div class="invalid-feedback">Lütfen bir PDF dosyası seçin.</div>
+                </div>
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="bi bi-upload"></i> Revizyonu Yükle
+                </button>
+            </form>
+            <div class="progress mt-3" style="display: none;" id="uploadProgress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%"></div>
+            </div>
+            {% if success %}
+            <div class="alert alert-success mt-3">
+                Revize belgeniz başarıyla yüklendi!
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function(){
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+
+    $('#revisionForm').on('submit', function(){
+        if(this.checkValidity()){
+            $('#uploadProgress').show();
+            var progressBar = $('#uploadProgress .progress-bar');
+            var width = 0;
+            var interval = setInterval(function(){
+                width += 10;
+                progressBar.css('width', width + '%');
+                if(width >= 100){
+                    clearInterval(interval);
+                }
+            }, 300);
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Ana Sayfa - Güvenli Belge Anonimleştirici{% endblock %}
+{% block content %}
+<div class="container my-5 text-center">
+    <div class="p-5 bg-white rounded-3 shadow-lg">
+        <h1 class="display-4 fw-bold">Güvenli Belge Anonimleştirici’ye Hoş Geldiniz</h1>
+        <p class="lead">Akademik makalelerinizi gelişmiş OCR, NLP teknikleriyle  anonimleştirin.</p>
+        <a href="{{ url_for('main.upload') }}" class="btn btn-primary btn-lg mt-3">
+            <i class="bi bi-upload"></i> Makalenizi Yükleyin
+        </a>
+    </div>
+</div>
+{% endblock %}
